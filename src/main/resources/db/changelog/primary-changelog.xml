@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы primary_table -->
+    <changeSet id="1" author="developer" context="primary">
+        <createTable tableName="primary_table">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Добавление тестовых данных -->
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 1"/>
+            <column name="age" value="25"/>
+        </insert>
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 2"/>
+            <column name="age" value="30"/>
+        </insert>
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 3"/>
+            <column name="age" value="35"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog>

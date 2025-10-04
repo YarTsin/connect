@@ -1,0 +1,328 @@
+
+ 
+=== Start of file: D:\project\actual\connect\src\main\java\com\example\connect\Main.java === 
+package com.example.connect;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * Точка входа (запуска)
+ * Проверяем подключение к 2 источникам данных
+ *
+ */
+@SpringBootApplication
+public class Main implements CommandLineRunner {
+
+	public static void main(String[] args) {
+		SpringApplication.run(Main.class, args);
+	}
+
+    @Override
+    public void run(String... args) throws Exception {
+        System.out.println("-----------------");
+        System.out.println("Проект запущен");
+        System.out.println("-----------------");
+
+    }
+}
+ 
+=== End of file: D:\project\actual\connect\src\main\java\com\example\connect\Main.java === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\java\com\example\connect\config\PrimaryConfig.java === 
+package com.example.connect.config;
+
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
+import liquibase.integration.spring.SpringLiquibase;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
+
+
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+   basePackages = "com.example.connect.primary_repo",
+   entityManagerFactoryRef = "primaryEntityManagerFactory",
+   transactionManagerRef = "primaryTransactionManager"
+)
+public class PrimaryConfig {
+
+  @Bean(name = "primaryDataSource")
+  @Primary
+  @ConfigurationProperties(prefix = "primary.datasource")
+  public DataSource dataSource() {
+    return DataSourceBuilder.create().type(HikariDataSource.class).build();
+  }
+
+
+  @Bean(name = "primaryEntityManagerFactory")
+  @Primary
+  public LocalContainerEntityManagerFactoryBean primaryEntityManagerFactory(
+     @Qualifier("primaryDataSource") DataSource primaryDataSource,
+     EntityManagerFactoryBuilder builder
+
+  ) {
+    return builder
+            .dataSource(primaryDataSource)
+            .packages("com.example.connect.primary_entity")
+            .persistenceUnit("primaryPU")
+            .build();
+  }
+
+
+  @Bean(name = "primaryTransactionManager")
+  @Primary
+  public PlatformTransactionManager transactionManager(
+    @Qualifier("primaryEntityManagerFactory")EntityManagerFactory entityManagerFactory) {
+    return new JpaTransactionManager(entityManagerFactory);
+  }
+
+
+  @Bean(name = "primaryLiquibase")
+  @Primary
+  public SpringLiquibase primaryLiquibase(@Qualifier("primaryDataSource") DataSource dataSource) {
+    SpringLiquibase liquibase = new SpringLiquibase();
+    liquibase.setDataSource(dataSource);
+    liquibase.setChangeLog("classpath:db/changelog/changelog-master.xml");
+    liquibase.setContexts("primary");
+    liquibase.setShouldRun(true); // no update = false
+    return liquibase;
+  }
+} 
+=== End of file: D:\project\actual\connect\src\main\java\com\example\connect\config\PrimaryConfig.java === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\java\com\example\connect\config\SecondaryConfig.java === 
+package com.example.connect.config;
+
+import com.zaxxer.hikari.HikariDataSource;
+import jakarta.persistence.EntityManagerFactory;
+import liquibase.integration.spring.SpringLiquibase;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
+
+@Configuration
+@EnableTransactionManagement
+@EnableJpaRepositories(
+   basePackages = "com.example.connect.secondary_repo",
+   entityManagerFactoryRef = "secondaryEntityManagerFactory",
+   transactionManagerRef = "secondaryTransactionManager"
+)
+public class SecondaryConfig {
+
+  @Bean(name = "secondaryDataSource")
+  @ConfigurationProperties(prefix = "secondary.datasource")
+  public DataSource dataSource() {
+    return DataSourceBuilder.create().type(HikariDataSource.class).build();
+  }
+
+
+  @Bean(name = "secondaryEntityManagerFactory")
+  public LocalContainerEntityManagerFactoryBean secondaryEntityManagerFactory(
+          @Qualifier("secondaryDataSource") DataSource secondaryDataSource,
+          EntityManagerFactoryBuilder builder
+  ) {
+    return builder
+            .dataSource(secondaryDataSource)
+            .packages("com.example.connect.secondary_entity")
+            .persistenceUnit("secondaryPU")
+            .build();
+  }
+
+
+  @Bean(name = "secondaryTransactionManager")
+  public PlatformTransactionManager transactionManager(
+      @Qualifier("secondaryEntityManagerFactory")EntityManagerFactory entityManagerFactory) {
+    return new JpaTransactionManager(entityManagerFactory);
+  }
+
+
+  @Bean(name = "secondaryLiquibase")
+  public SpringLiquibase secondaryLiquibase(@Qualifier("secondaryDataSource") DataSource dataSource) {
+    SpringLiquibase liquibase = new SpringLiquibase();
+    liquibase.setDataSource(dataSource);
+    liquibase.setChangeLog("classpath:db/changelog/changelog-master.xml");
+    liquibase.setContexts("secondary");
+    liquibase.setShouldRun(true); // no update = false
+    return liquibase;
+  }
+} 
+=== End of file: D:\project\actual\connect\src\main\java\com\example\connect\config\SecondaryConfig.java === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\java\com\example\connect\primary_entity\PrimaryEntity.java === 
+package com.example.connect.primary_entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "primary_table")
+public class PrimaryEntity {
+}
+ 
+=== End of file: D:\project\actual\connect\src\main\java\com\example\connect\primary_entity\PrimaryEntity.java === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\resources\application.properties === 
+spring.application.name=connect
+
+primary.datasource.jdbc-url=jdbc:h2:file:./database/primary_db
+primary.datasource.username=sa
+primary.datasource.password=
+
+secondary.datasource.jdbc-url=jdbc:h2:file:./database/secondary_db
+secondary.datasource.username=sa
+secondary.datasource.password=
+
+
+# http://localhost:8080/h2-console
+spring.h2.console.enabled=true
+spring.h2.console.path=/h2-console
+
+# Liquibase Control
+spring.liquibase.enabled=false
+
+# JPA settings
+spring.jpa.show-sql=true
+
+#some log off
+spring.main.banner-mode=off 
+logging.level.org.springframework.boot.autoconfigure=ERROR 
+=== End of file: D:\project\actual\connect\src\main\resources\application.properties === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\resources\db\changelog\changelog-master.xml === 
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Включаем changelog для primary базы -->
+    <include file="db/changelog/primary-changelog.xml" relativeToChangelogFile="false"/>
+
+    <!-- Включаем changelog для secondary базы -->
+    <include file="db/changelog/secondary-changelog.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog> 
+=== End of file: D:\project\actual\connect\src\main\resources\db\changelog\changelog-master.xml === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\resources\db\changelog\primary-changelog.xml === 
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы primary_table -->
+    <changeSet id="1" author="developer" context="primary">
+        <createTable tableName="primary_table">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Добавление тестовых данных -->
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 1"/>
+            <column name="age" value="25"/>
+        </insert>
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 2"/>
+            <column name="age" value="30"/>
+        </insert>
+        <insert tableName="primary_table">
+            <column name="name" value="Primary User 3"/>
+            <column name="age" value="35"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog> 
+=== End of file: D:\project\actual\connect\src\main\resources\db\changelog\primary-changelog.xml === 
+ 
+=== Start of file: D:\project\actual\connect\src\main\resources\db\changelog\secondary-changelog.xml === 
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Создание таблицы secondary_table -->
+    <changeSet id="1" author="developer" context="secondary">
+        <createTable tableName="secondary_table">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="age" type="INT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Добавление тестовых данных -->
+        <insert tableName="secondary_table">
+            <column name="name" value="Secondary User 1"/>
+            <column name="age" value="22"/>
+        </insert>
+        <insert tableName="secondary_table">
+            <column name="name" value="Secondary User 2"/>
+            <column name="age" value="28"/>
+        </insert>
+        <insert tableName="secondary_table">
+            <column name="name" value="Secondary User 3"/>
+            <column name="age" value="33"/>
+        </insert>
+    </changeSet>
+</databaseChangeLog> 
+=== End of file: D:\project\actual\connect\src\main\resources\db\changelog\secondary-changelog.xml === 
+ 
+=== Start of file: D:\project\actual\connect\src\test\java\com\example\connect\MainTests.java === 
+package com.example.connect;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class MainTests {
+
+	@Test
+	void contextLoads() {
+	}
+
+}
+ 
+=== End of file: D:\project\actual\connect\src\test\java\com\example\connect\MainTests.java === 

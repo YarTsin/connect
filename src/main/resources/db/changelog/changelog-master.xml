@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <!-- Включаем changelog для primary базы -->
+    <include file="db/changelog/primary-changelog.xml" relativeToChangelogFile="false"/>
+
+    <!-- Включаем changelog для secondary базы -->
+    <include file="db/changelog/secondary-changelog.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog>

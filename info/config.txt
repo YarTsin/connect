@@ -1,0 +1,23 @@
+https://start.spring.io/
+
+Собираем конфиг
+Spring Boot 3.5.6
+Maven
+Java  21
+Package Jar 
+
+Group - com.example
+Artifact - connect
+Name - connect
+Description - connecting 2+ data sources
+Package name - com.example.connect
+
+Developer tools
+-Spring Boot DevTools (под вопросом)
+Spring Configuration Processor (метаданные конфигурации - автодополнения app.properties)
+Lombok
+
+SQL
+Spring Data JPA (вроде пока этого достаточно  JDBC API, Spring Data JDBC не нужен)
+Liquebase Migration
+H2 Database
