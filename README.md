@@ -9,14 +9,16 @@ Tech stack: Windows 11, Spring Boot 3.5.6, Maven, Java  21, <br>
 Spring Data JPA, Liquebase Migration, H2 Database
 
 Result:<br>
-<code>
+```
 Данные первой базы данных
 Hibernate: select pe1_0.id,pe1_0.age,pe1_0.name from public.primary_table pe1_0
-
-[PrimaryEntity(id=1, name=Primary User 1, age=25), PrimaryEntity(id=2, name=Primary User 2, age=30), PrimaryEntity(id=3, name=Primary User 3, age=35)]
+[PrimaryEntity(id=1, name=Primary User 1, age=25), 
+PrimaryEntity(id=2, name=Primary User 2, age=30), 
+PrimaryEntity(id=3, name=Primary User 3, age=35)]
 
 Данные второй базы данных
 Hibernate: select se1_0.id,se1_0.age,se1_0.name from public.secondary_table se1_0
-
-[SecondaryEntity(id=1, name=Secondary User 1, age=22), SecondaryEntity(id=2, name=Secondary User 2, age=28), SecondaryEntity(id=3, name=Secondary User 3, age=33)]
-</code>
+[SecondaryEntity(id=1, name=Secondary User 1, age=22), 
+SecondaryEntity(id=2, name=Secondary User 2, age=28), 
+SecondaryEntity(id=3, name=Secondary User 3, age=33)]
+```
