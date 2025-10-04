@@ -1,9 +1,12 @@
 <h3> Подключение двух и более источников данных </h3>
 
 Description: подключение двух и более источников данных <br>
-в современных проектах на основе Spring Boot 3.5.6
+в современных проектах на основе Spring Boot 3.5.6 <br>
+Вы можете использовать встроенную базу данных с данными, <br>
+или с помощью настроечных бинов Liquebase залить свои данные 
 
-Tech stack: Windows 11, Spring Boot 3.5.6, Maven, Java  21
+Tech stack: Windows 11, Spring Boot 3.5.6, Maven, Java  21, <br>
+Spring Data JPA, Liquebase Migration, H2 Database
 
 Result:<br>
 <code>
